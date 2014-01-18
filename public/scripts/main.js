@@ -42,7 +42,7 @@ define(['jquery','D3','queue','moment','slider'], function($, d3, queue, moment)
     var svgPadding = 20;
 
     // debug
-    var mode = 2; // 0 for scatter plot, 1 for heatmap, 2 for shape
+    var mode = 0; // 0 for scatter plot, 1 for heatmap, 2 for shape
     var showValue = 1;
 
     /*
@@ -164,7 +164,7 @@ define(['jquery','D3','queue','moment','slider'], function($, d3, queue, moment)
         var date = [];
         var mapDay = {0: "Sun", 1: "Mon", 2: "Tue", 3: "Wed", 4: "Thu", 5: "Fri", 6: "Sat"};
 
-        svg.append('g').attr({'class': 'testGraph'+currentWeek});
+//        svg.append('g').attr({'class': 'testGraph'+currentWeek});
         console.log(structured);
 
         var mapD = {0: "prevsat", 1: "sunday", 2: "monday", 3: "tuesday", 4: "wednesday", 5: "thursday", 6: "friday", 7: "saturday"};
@@ -179,13 +179,13 @@ define(['jquery','D3','queue','moment','slider'], function($, d3, queue, moment)
             .attr({'x': svgPadding*5+35, 'y': function(d,i){ return 30+39*i; }, 'width': svgPadding*2, 'height': svgPadding*2, 'font-size': 12, 'class': 'monthIndicator'})
             .text(function(d,i){ if(d != undefined){ return moment(d).format('MMM, DD') }else{ return null;}})
             .attr("text-anchor","end")
-            .style({'fill': '#666', 'stroke-width': 1, 'stroke': '#666'});
+            .style({'fill': '#666', 'stroke-width': 0, 'stroke': '#666'});
 
         svg.selectAll('text.dayIndicator').data(dates).enter().append('text')
             .attr({'x': svgPadding*3+20, 'y': function(d,i){ return 30+39*i; }, 'width': svgPadding*2, 'height': svgPadding*2, 'font-size': 12, 'class': 'dayIndicator'})
             .text(function(d,i){ if(d){ return mapDay[moment(d).day()]; } })
             .attr("text-anchor","end")
-            .style({'fill': '#666', 'stroke-width': 1, 'stroke': '#666'});
+            .style({'fill': '#666', 'stroke-width': 0, 'stroke': '#666'});
 
         svg.append('g').attr({'class': 'testGraph'+currentWeek});
 
@@ -196,26 +196,26 @@ define(['jquery','D3','queue','moment','slider'], function($, d3, queue, moment)
             svg.select('g.testGraph'+currentWeek).selectAll('.elementGroup').data(testDrive.levels).append('path')
                 .attr({
                     'd': function(d,idx){
-                        var dPath = 'M '+parseInt(scaleTimeHeatmap(testDrive.times[idx], testDrive.dates[0])-((svgWidth-10*svgPadding)/24/2))+' '+parseInt(svgPadding-10 + i*39);
+                        var dPath = 'M '+parseInt(scaleTimeHeatmap(testDrive.times[idx], testDrive.dates[0]))+' '+parseInt(svgPadding-10 + i*39);
                         if(d>180){ // draw circle
-                            dPath += ' m 0, 14.5 a 14.5,14.5 0 1, 0 29, 0 a 14.5,14.5 0 1,0 -29,0';
+                            dPath += ' m -14.5, 14.5 a 14.5,14.5 0 1, 0 29, 0 a 14.5,14.5 0 1,0 -29,0';
                         }else if(d<=180 && d>70){
-                            dPath += ' m 0, 14.5 a 14.5,14.5 0 1, 0 29, 0 a 14.5,14.5 0 1,0 -29,0'; // m 14.5, 29 l 14.5 0 l 0 -29 l -29 0 l 0 29 l 14.5 0';
+                            dPath += ' m -14.5, 0 l 29 0 l 0 29 l -29 0 l 0 -29'; // m 14.5, 29 l 14.5 0 l 0 -29 l -29 0 l 0 29 l 14.5 0';
                         }else{
-                            dPath += ' m 14.5, 0 l -14.5 29 l 29 0 l -14.5 -29';
+                            dPath += ' m 0, 0 l -14.5 29 l 29 0 l -14.5 -29';
                         }
                         return dPath;},
                     'id': function(d,i){
                         return i;}
                 })
                 .attr({"stroke-dasharray":function(d,i){ if(d<=180 && d>70){ return "5,5" }else{ return ""} }})
-                .style({'fill': function(d,i){ if(d>180){ return "rgba(200,200,200,0.8)"; }else{ return "#ffffff"}}})
-                .style({'stroke': 'rgba(180,180,180,0.8)', 'stroke-width': 1 });
+                .style({'fill': '#ffffff'})
+                .style({'stroke': function(d,i){ if(d>180 || d<=70){ return 'rgba(110,110,110,0.8)' }else{return 'rgba(110,110,110,0.8)'} }, 'stroke-width': function(d,i){ if(d>180 || d<=70){ return 3;} else{ return 1; }} });
 
             if(showValue == 1){
                 svg.select('g.testGraph'+currentWeek).selectAll('.elementGroup').data(testDrive.levels).append('text')
-                    .attr({'x': function(d,idx){ return scaleTimeHeatmap(testDrive.times[idx], testDrive.dates[0])-(svgWidth-10*svgPadding)/24/2 + 3;}, 'y': svgPadding+ 10 + i*39, 'font-size': 9, 'id': function(d,i){ return i;}, 'class': 'BGValue'})
-                    .text(function(d,i){ return d;})
+                    .attr({'x': function(d,idx){ return scaleTimeHeatmap(testDrive.times[idx], testDrive.dates[0])-(svgWidth-10*svgPadding)/24/2 + 6;}, 'y': svgPadding+ 10 + i*39, 'font-size': 9, 'id': function(d,i){ return i;}, 'class': 'BGValue'})
+                    .text(function(d,i){ return parseInt(d);})
                     .style({'fill': '#000000', 'stroke-width': 0, 'stroke': '#000000'});
             }
 
@@ -232,44 +232,6 @@ define(['jquery','D3','queue','moment','slider'], function($, d3, queue, moment)
         });
 
 
-
-
-
-//        for(var j=0; j<numOfWeeks; j++){
-//            var testDrive = eval('structured[j].'+day);
-//            var oneDate = new Array(testDrive.dates[0]);
-//
-
-//
-//            svg.append('g').attr({'class': 'testGraph'+j});
-//            svg.select('g.testGraph'+j).selectAll('g').data(testDrive.levels).enter().append('g')
-//                .attr({'class': 'elementGroup'});
-//            svg.select('g.testGraph'+j).selectAll('.elementGroup').data(testDrive.levels).append('path')
-//                .attr({
-//                    'd': function(d,i){
-//                        var dPath = 'M '+parseInt(scaleTimeHeatmap(testDrive.times[i], testDrive.dates[0])-((svgWidth-10*svgPadding)/24/2))+' '+parseInt(svgPadding-10 + j*39);
-//                        if(d>180){ // draw circle
-//                            dPath += ' m 0, 14.5 a 14.5,14.5 0 1, 0 29, 0 a 14.5,14.5 0 1,0 -29,0';
-//                        }else if(d<=180 && d>70){
-//                            dPath += ' m 0, 14.5 a 14.5,14.5 0 1, 0 29, 0 a 14.5,14.5 0 1,0 -29,0'; // m 14.5, 29 l 14.5 0 l 0 -29 l -29 0 l 0 29 l 14.5 0';
-//                        }else{
-//                            dPath += ' m 14.5, 0 l -14.5 29 l 29 0 l -14.5 -29';
-//                        }
-//                        return dPath;},
-//                    'id': function(d,i){
-//                        return i;}
-//                })
-//                .attr({"stroke-dasharray":function(d,i){ if(d<=180 && d>70){ return "5,5" }else{ return ""} }})
-//                .style({'fill': function(d,i){ if(d>180){ return "rgba(200,200,200,0.8)"; }else{ return "#ffffff"}}})
-//                .style({'stroke': 'rgba(180,180,180,0.8)', 'stroke-width': 1 });
-//
-//            if(showValue == 1){
-//                svg.select('g.testGraph'+j).selectAll('.elementGroup').data(testDrive.levels).append('text')
-//                    .attr({'x': function(d,i){ return scaleTimeHeatmap(testDrive.times[i], testDrive.dates[0])-(svgWidth-10*svgPadding)/24/2 + 3;}, 'y': svgPadding+ 10 + j*39, 'font-size': 9, 'id': function(d,i){ return i;}, 'class': 'BGValue'})
-//                    .text(function(d,i){ return d;})
-//                    .style({'fill': '#000000', 'stroke-width': 0, 'stroke': '#000000'});
-//            }
-//        }
 
 
     }
@@ -296,12 +258,12 @@ define(['jquery','D3','queue','moment','slider'], function($, d3, queue, moment)
 
         for(var i=0; i<8; i++){
             svg.append('rect')
-                .attr({x: svgPadding*8, y: svgPadding-10 + i * 39, width: svgWidth-10*svgPadding, height: 29 })
+                .attr({x: svgPadding*8, y: svgPadding-10 + i * 39, width: 29*24, height: 29 })
                 .style({'stroke': '#ddd', 'stroke-width': 0, 'fill': 'none'});
 
-            for(var j=0; j<23; j++){
+            for(var j=0; j<24; j++){
                 svg.append('rect')
-                    .attr({x: svgPadding*8 + (svgWidth-10*svgPadding)/24 * j, y: svgPadding-10 + i * 39, width: (svgWidth-10*svgPadding)/24, height: 29 })
+                    .attr({x: svgPadding*8 + 29 * j, y: svgPadding-10 + i * 39, width: 29, height: 29 })
                     .style({'stroke': '#ddd', 'stroke-width': 0, 'fill': 'none'})
             }
 
@@ -321,7 +283,6 @@ define(['jquery','D3','queue','moment','slider'], function($, d3, queue, moment)
 
         var ticksTime = ["12:00 AM","3:00 AM","6:00 AM","9:00 AM","12:00 PM","3:00 PM","6:00 PM","9:00 PM","11:59 PM"];
 
-
         svg.selectAll('text.time').data(ticksTime).enter().append('text')
             .text(function(d,i){ if(i != 8){ return moment('2013/01/01 '+d).format('h A');}else{ return (moment('2013/01/01 '+d).hour()+1)/2+ ' AM'; } })
             .attr({'x': function(d,i){ return svgPadding*8+(svgWidth-10*svgPadding)/24*(i)*3-12; }, 'y': svgHeight - svgPadding*2 + 195, 'font-size': '9px', 'class': 'time'});
@@ -332,28 +293,40 @@ define(['jquery','D3','queue','moment','slider'], function($, d3, queue, moment)
         if(!numOfWeeks){
             numOfWeeks = 1;
         }
-        // expands the svg height according to the # of weeks to be displayed
+        // expands the svg height according to the # of days (7) to be displayed
         if(mode == 0){
-            svg.style({'height': svgHeight*numOfWeeks + 'px' });
-        }else if(mode == 1){
-            svg.style({'height': svgHeight + 'px' });
+            svg.style({'height': svgHeight * 7+ 'px' });
+        }else if(mode == 1 || mode == 2){
+            svg.style({'height': 39 * 9 + 'px' });
         }
 
-
+        svg.select(".weekIndicator").remove();
         svg.append('text')
-            .text(function(){ var map=["SUNDAY","MONDAY","TUESDAY","WEDNESDAY","THURSDAY","FRIDAY","SATURDAY"]; return map[svg.attr('id')];})
-            .attr({x: svgPadding*1-10, y: svgPadding-35, 'transform': 'rotate(90)', 'font-size': 25})
+            .text(function(){ return "Week " + parseInt(parseInt(svg.attr('id'))+1); })
+            .attr({x: svgPadding*1-10, y: svgPadding-35, 'transform': 'rotate(90)', 'font-size': 25, "class": "weekIndicator"})
             .style({'fill':'#666666', 'stroke-width':0});
 
-        for(var i=0; i<numOfWeeks; i++){
-            svg.append('rect')
-                .attr({x: svgPadding*8, y: svgPadding-10 + i * 29, width: svgWidth-10*svgPadding, height: 29 })
-                .style({'stroke': '#ddd', 'stroke-width': 1, 'fill': 'none'});
+        svg.append('rect')
+            .attr({x: scaleTimeHeatmap("06:00 AM", "2013-08-10"), y: svgPadding-10, width: scaleTimeHeatmap("09:00 AM", "2013-08-10") - scaleTimeHeatmap("06:00 AM", "2013-08-10"), "class": "breakfastBracket", "height": 147+156})
+            .style({"fill": "#eeeeee"});
 
-            for(var j=0; j<23; j++){
+        svg.append('rect')
+            .attr({x: scaleTimeHeatmap("11:00 AM", "2013-08-10"), y: svgPadding-10, width: scaleTimeHeatmap("02:00 PM", "2013-08-10") - scaleTimeHeatmap("11:00 AM", "2013-08-10"), "class": "lunchBracket", "height": 147+156})
+            .style({"fill": "#eeeeee"});
+
+        svg.append('rect')
+            .attr({x: scaleTimeHeatmap("05:00 PM", "2013-08-10"), y: svgPadding-10, width: scaleTimeHeatmap("08:00 PM", "2013-08-10") - scaleTimeHeatmap("05:00 PM", "2013-08-10"), "class": "dinnerBracket", "height": 147+156})
+            .style({"fill": "#eeeeee"});
+
+        for(var i=0; i<8; i++){
+            svg.append('rect')
+                .attr({x: svgPadding*8, y: svgPadding-10 + i * 39, width: 29*24, height: 29 })
+                .style({'stroke': '#ddd', 'stroke-width': 0, 'fill': 'none'});
+
+            for(var j=0; j<24; j++){
                 svg.append('rect')
-                    .attr({x: svgPadding*8 + (svgWidth-10*svgPadding)/24 * j, y: svgPadding-10 + i * 29, width: (svgWidth-10*svgPadding)/24, height: 29 })
-                    .style({'stroke': '#ddd', 'stroke-width': 1, 'fill': 'none'})
+                    .attr({x: svgPadding*8 + 29 * j, y: svgPadding-10 + i * 39, width: 29, height: 29 })
+                    .style({'stroke': '#ddd', 'stroke-width': 0, 'fill': 'none'})
             }
 
         }
@@ -363,7 +336,7 @@ define(['jquery','D3','queue','moment','slider'], function($, d3, queue, moment)
 
         svg.selectAll('text.time').data(ticksTime).enter().append('text')
             .text(function(d,i){ if(i != 8){ return moment('2013/01/01 '+d).format('h A');}else{ return (moment('2013/01/01 '+d).hour()+1)/2+ ' AM'; } })
-            .attr({'x': function(d,i){ return svgPadding*8+(svgWidth-10*svgPadding)/24*(i)*3-12; }, 'y': svgHeight - svgPadding*2, 'font-size': '9px', 'class': 'time'});
+            .attr({'x': function(d,i){ return svgPadding*8+(svgWidth-10*svgPadding)/24*(i)*3-12; }, 'y': svgHeight - svgPadding*2 + 195, 'font-size': '9px', 'class': 'time'});
 
     }
 
@@ -372,28 +345,42 @@ define(['jquery','D3','queue','moment','slider'], function($, d3, queue, moment)
             numOfWeeks = 1;
         }
 
-        for(var j=0; j<numOfWeeks; j++){
-            var testDrive = eval('structured[j].'+day);
-            var oneDate = new Array(testDrive.dates[0]);
+        var currentWeek = parseInt(svg.attr('id'));
+        var date = [];
+        var mapDay = {0: "Sun", 1: "Mon", 2: "Tue", 3: "Wed", 4: "Thu", 5: "Fri", 6: "Sat"};
 
-            svg.selectAll('rect.weekIndicator'+j).data(oneDate).enter().append('rect')
-                .attr({'x': svgPadding*3+10, 'y': 10 + j*29, 'width': 5, 'height': 29, 'class': 'weekIndicator'+j})
-                .style({'fill': function(d){ if(d != undefined){ return catColors(j)}else{ return '#ffffff';}}});
-            svg.selectAll('text.monthIndicator'+j).data(oneDate).enter().append('text')
-                .attr({'x': svgPadding*3+24, 'y': 30 + j*29, 'width': svgPadding*2, 'height': svgPadding*2, 'font-size': 14, 'class': 'monthIndicator'+j})
-                .text(function(d,i){ if(d != undefined){ return moment(d).format('MMM') }else{ return null;}})
-                .style({'fill': '#999999', 'stroke-width': 0});
-            svg.selectAll('text.dayIndicator'+j).data(oneDate).enter().append('text')
-                .attr({'x': svgPadding*3+55, 'y': 30 + j*29, 'width': svgPadding*2, 'height': svgPadding*2, 'font-size': 14, 'class': 'dayIndicator'+j})
-                .text(function(d,i){ if(d != undefined){ return moment(d).format('DD') }else{ return null;}})
-                .style({'fill': '#999999', 'stroke-width': 0});
+//        svg.append('g').attr({'class': 'testGraph'+currentWeek});
+        console.log(structured);
 
-            svg.append('g').attr({'class': 'testGraph'+j});
-            svg.select('g.testGraph'+j).selectAll('g').data(testDrive.levels).enter().append('g')
+        var mapD = {0: "prevsat", 1: "sunday", 2: "monday", 3: "tuesday", 4: "wednesday", 5: "thursday", 6: "friday", 7: "saturday"};
+        var dates = [];
+
+        for(var i=0; i<8; i++){
+            dates.push(eval("structured[currentWeek]."+mapD[i]+".dates[0]"));
+
+        }
+
+        svg.selectAll('text.monthIndicator').data(dates).enter().append('text')
+            .attr({'x': svgPadding*5+35, 'y': function(d,i){ return 30+39*i; }, 'width': svgPadding*2, 'height': svgPadding*2, 'font-size': 12, 'class': 'monthIndicator'})
+            .text(function(d,i){ if(d != undefined){ return moment(d).format('MMM, DD') }else{ return null;}})
+            .attr("text-anchor","end")
+            .style({'fill': '#666', 'stroke-width': 0, 'stroke': '#666'});
+
+        svg.selectAll('text.dayIndicator').data(dates).enter().append('text')
+            .attr({'x': svgPadding*3+20, 'y': function(d,i){ return 30+39*i; }, 'width': svgPadding*2, 'height': svgPadding*2, 'font-size': 12, 'class': 'dayIndicator'})
+            .text(function(d,i){ if(d){ return mapDay[moment(d).day()]; } })
+            .attr("text-anchor","end")
+            .style({'fill': '#666', 'stroke-width': 0, 'stroke': '#666'});
+
+        svg.append('g').attr({'class': 'testGraph'+currentWeek});
+
+        for(var i=0; i<8; i++){
+            var testDrive = eval('structured[currentWeek].'+mapD[i]);
+            svg.select('g.testGraph'+currentWeek).selectAll('g').data(testDrive.levels).enter().append('g')
                 .attr({'class': 'elementGroup'});
-            svg.select('g.testGraph'+j).selectAll('.elementGroup').data(testDrive.levels).append('circle')
-                .attr({'cx': function(d,i){ console.log(scaleTimeHeatmap(testDrive.times[i], testDrive.dates[0])-(svgWidth-10*svgPadding)/24/2); return scaleTimeHeatmap(testDrive.times[i], testDrive.dates[0])-(svgWidth-10*svgPadding)/24/2;}, 'cy': svgPadding-10 + j*29, 'r': (svgWidth-10*svgPadding)/36, 'id': function(d,i){ return i;}})
-                .style({'stroke': 'none', 'fill-opacity': 0.65, 'fill': function(d,i){
+            svg.select('g.testGraph'+currentWeek).selectAll('.elementGroup').data(testDrive.levels).append('circle')
+                .attr({'cx': function(d,idx){ return scaleTimeHeatmap(testDrive.times[idx], testDrive.dates[0]);}, 'cy': svgPadding-10 + 14.5 + i*39, 'r': 14.5, 'id': function(d,idx){ return idx;}})
+                .style({'stroke': 'none', 'fill-opacity': 0.65, 'fill': function(d,idx){
                     var h=0;
                     var s=0;
                     var l=0;
@@ -423,25 +410,26 @@ define(['jquery','D3','queue','moment','slider'], function($, d3, queue, moment)
                 }
                 });
 
+
             if(showValue == 1){
-                svg.select('g.testGraph'+j).selectAll('.elementGroup').data(testDrive.levels).append('text')
-                    .attr({'x': function(d,i){ return scaleTimeHeatmap(testDrive.times[i], testDrive.dates[0])-(svgWidth-10*svgPadding)/24/2 + 3;}, 'y': svgPadding+ 10 + j*29, 'font-size': 9, 'id': function(d,i){ return i;}, 'class': 'BGValue'})
-                    .text(function(d,i){ return d;})
+                svg.select('g.testGraph'+currentWeek).selectAll('.elementGroup').data(testDrive.levels).append('text')
+                    .attr({'x': function(d,idx){ return scaleTimeHeatmap(testDrive.times[idx], testDrive.dates[0]) - 8;}, 'y': svgPadding+ 10 + i*39, 'font-size': 9, 'id': function(d,idx){ return idx;}, 'class': 'BGValue'})
+                    .text(function(d,idx){ return parseInt(d);})
                     .style({'fill': '#000000', 'stroke-width': 0, 'stroke': '#000000'});
             }
-
         }
 
-        svg.selectAll('.elementGroup').on('mouseover', function(d,i){ // svg.selectAll('g rect').on('mouseover', function(d,i){
+
+        svg.selectAll('.BGValue').on('mouseover', function(d,i){ // svg.selectAll('g rect').on('mouseover', function(d,i){
 //            var textElement = $(this).parent().find('.BGValue[id='+$(this).attr('id')+']');
 //            console.log(d3.select(textElement)[0][0]);
 
-            d3.select(this).select('.BGValue').transition().attr({'font-size': 20}); // 'y': parseInt(d3.select(textElement)[0][0].attr('y')) - 20,
+            d3.select(this).transition().attr({'font-size': 20}); // 'y': parseInt(d3.select(textElement)[0][0].attr('y')) - 20,
         });
 
-        svg.selectAll('.elementGroup').on('mouseout', function(d,i){
+        svg.selectAll('.BGValue').on('mouseout', function(d,i){
             var textElement = $(this).parent().find('.BGValue[id='+$(this).attr('id')+']');
-            d3.select(this).select('.BGValue').transition().attr({ 'font-size': 9}); //'y': parseInt(d3.select(textElement)[0][0].attr('y')) + 20,
+            d3.select(this).transition().attr({ 'font-size': 9}); //'y': parseInt(d3.select(textElement)[0][0].attr('y')) + 20,
         });
 
     }
@@ -469,7 +457,7 @@ define(['jquery','D3','queue','moment','slider'], function($, d3, queue, moment)
         date = date.replace(/\b-\b/g, "/");
         var beginning = moment(date + " 12:00:00 AM").valueOf();
         var ending = beginning + 86400000;
-        var rangeFunc = d3.scale.linear().domain([beginning, ending]).range([svgPadding*8, svgWidth - svgPadding*3]);
+        var rangeFunc = d3.scale.linear().domain([beginning, ending]).range([svgPadding*8, svgPadding*8 + 24*29]);
         return rangeFunc(moment(date+' '+item).valueOf());
     }
 
@@ -478,14 +466,15 @@ define(['jquery','D3','queue','moment','slider'], function($, d3, queue, moment)
             numOfWeeks = 1;
         }
         // expands the svg height according to the # of weeks to be displayed
-        svg.style({'height': svgHeight*numOfWeeks + 'px' });
+        svg.style({'height': svgHeight*7 + 'px' });
 
+        svg.select(".weekIndicator").remove();
         svg.append('text')
-            .text(function(){ var map=["SUNDAY","MONDAY","TUESDAY","WEDNESDAY","THURSDAY","FRIDAY","SATURDAY"]; return map[svg.attr('id')];})
-            .attr({x: svgPadding*1-10, y: svgPadding-35, 'transform': 'rotate(90)', 'font-size': 25})
+            .text(function(){ return "Week " + parseInt(parseInt(svg.attr('id'))+1); })
+            .attr({x: svgPadding*1-10, y: svgPadding-35, 'transform': 'rotate(90)', 'font-size': 25, "class": "weekIndicator"})
             .style({'fill':'#666666', 'stroke-width':0});
 
-        for(var i=0; i<numOfWeeks; i++){
+        for(var i=0; i<8; i++){
             svg.append('line')
                 .attr({x1: svgPadding*8, x2: svgWidth - svgPadding, y1: svgHeight - svgPadding + i * svgHeight, y2: svgHeight - svgPadding + i * svgHeight })
                 .style({'stroke': '#999', 'stroke-width': 1});
@@ -498,7 +487,20 @@ define(['jquery','D3','queue','moment','slider'], function($, d3, queue, moment)
         var ticksBG = [0, 50, 100, 150, 200, 250, 300, 350];
         var ticksTime = ["12:00 AM","3:00 AM","6:00 AM","9:00 AM","12:00 PM","3:00 PM","6:00 PM","9:00 PM","11:59 PM"];
 
-        for(var j=0; j<numOfWeeks; j++){
+
+        for(var j=0; j<8; j++){
+            svg.append('rect')
+                .attr({x: scaleTimeHeatmap("06:00 AM", "2013-08-10"), y: svgPadding-10+j*svgHeight, width: scaleTimeHeatmap("09:00 AM", "2013-08-10") - scaleTimeHeatmap("06:00 AM", "2013-08-10"), "class": "breakfastBracket", "height": 149})
+                .style({"fill": "#eeeeee"});
+
+            svg.append('rect')
+                .attr({x: scaleTimeHeatmap("11:00 AM", "2013-08-10"), y: svgPadding-10+j*svgHeight, width: scaleTimeHeatmap("02:00 PM", "2013-08-10") - scaleTimeHeatmap("11:00 AM", "2013-08-10"), "class": "lunchBracket", "height": 149})
+                .style({"fill": "#eeeeee"});
+
+            svg.append('rect')
+                .attr({x: scaleTimeHeatmap("05:00 PM", "2013-08-10"), y: svgPadding-10+j*svgHeight, width: scaleTimeHeatmap("08:00 PM", "2013-08-10") - scaleTimeHeatmap("05:00 PM", "2013-08-10"), "class": "dinnerBracket", "height": 149})
+                .style({"fill": "#eeeeee"});
+
             svg.selectAll('text.BG'+j).data(ticksBG).enter().append('text')
                 .text(function(d){ return d; })
                 .attr({'x': svgPadding*7, 'y': function(d,i){ return svgHeight*j + scaleBG(d, raw) + 3;}, 'font-size': '9px', 'class': 'BG'+j})
@@ -517,13 +519,13 @@ define(['jquery','D3','queue','moment','slider'], function($, d3, queue, moment)
                 .attr({'x': function(d,i){ return scaleTime(d, "2013/01/01") - 14+'px'; }, 'y': svgHeight - svgPadding + 15 + j*svgHeight, 'font-size': '9px', 'class': 'time'+j});
         }
 
-
         // draw the normal range
         for(var j=0; j<numOfWeeks; j++){
             svg.append('rect')
                 .attr({'x': svgPadding*8, 'y': scaleBG(120, raw)+j*svgHeight, 'width': svgWidth - svgPadding*9, 'height': parseFloat(scaleBG(70, raw) - scaleBG(120,raw))})
                 .style({'fill': 'rgba(200,200,200,0.5)'});
         }
+
     }
 
     function drawScatter(svg, numOfWeeks, day){
@@ -531,49 +533,99 @@ define(['jquery','D3','queue','moment','slider'], function($, d3, queue, moment)
             numOfWeeks = 1;
         }
 
-        for(var j=0; j<numOfWeeks; j++){
-            var testDrive = eval('structured[j].'+day);
-            var oneDate = new Array(testDrive.dates[0]);
+        var currentWeek = parseInt(svg.attr('id'));
+        var date = [];
+        var mapDay = {0: "Sunday", 1: "Monday", 2: "Tuesday", 3: "Wednesday", 4: "Thursday", 5: "Friday", 6: "Saturday"};
 
-            svg.selectAll('rect.weekIndicator'+j).data(oneDate).enter().append('rect')
-                .attr({'x': svgPadding*3+20, 'y': 8 + j*svgHeight, 'width': 35, 'height': 5, 'class': 'weekIndicator'+j})
-                .style({'fill': function(d){ if(d != undefined){ return catColors(j)}else{ return '#ffffff';}}});
+        svg.append('g').attr({'class': 'testGraph'+currentWeek});
+        console.log(structured);
 
-            svg.selectAll('text.monthIndicator'+j).data(oneDate).enter().append('text')
-                .attr({'x': svgPadding*3+24, 'y': 30 + j*svgHeight, 'width': svgPadding*2, 'height': svgPadding*2, 'font-size': 14, 'class': 'monthIndicator'+j})
-                .text(function(d,i){ if(d != undefined){ return moment(d).format('MMM');}else{ return null;}})
-                .style({'fill': '#999999', 'stroke-width': 0});
-            svg.selectAll('text.dayIndicator'+j).data(oneDate).enter().append('text')
-                .attr({'x': svgPadding*3+25, 'y': 50 + j*svgHeight, 'width': svgPadding*2, 'height': svgPadding*2, 'font-size': 20, 'class': 'dayIndicator'+j })
-                .text(function(d,i){ if(d != undefined){ return moment(d).format('DD');}else{ return null;}})
-                .style({'fill': '#999999', 'stroke-width': 0});
+        var mapD = {0: "prevsat", 1: "sunday", 2: "monday", 3: "tuesday", 4: "wednesday", 5: "thursday", 6: "friday", 7: "saturday"};
+        var dates = [];
 
-            svg.append('g').attr({'class': 'testGraph'+j});
-            svg.select('g.testGraph'+j).selectAll('g').data(testDrive.levels).enter().append('g')
-                .attr({'class': 'elementGroup'});
-            svg.select('g.testGraph'+j).selectAll('g.elementGroup').data(testDrive.levels).append('circle')
-                .attr({'r': 4, 'cx': function(d,i){ return scaleTime(testDrive.times[i], testDrive.dates[0]);}, 'cy': function(d,i){ return svgHeight*j + scaleBG(testDrive.levels[i], raw)}})
-                .style({'stroke': 'none', 'fill': 'rgba(30,30,30,0.5)'});
+        for(var i=0; i<8; i++){
+            dates.push(eval("structured[currentWeek]."+mapD[i]+".dates[0]"));
 
-            if(showValue == 1){
-                svg.select('g.testGraph'+j).selectAll('g.elementGroup').data(testDrive.levels).append('text')
-                    .attr({'x': function(d,i){ return scaleTime(testDrive.times[i], testDrive.dates[0]) - 10;}, 'y': function(d,i){return svgHeight*j + scaleBG(testDrive.levels[i], raw) + 15}, 'font-size': 9, 'id': function(d,i){ return i;}, 'class': 'BGValue'})
-                    .text(function(d,i){ return d;})
-                    .style({'fill': '#000000', 'stroke-width': 0, 'stroke': '#000000'});
-            }
         }
 
+        svg.selectAll('text.monthIndicator').data(dates).enter().append('text')
+            .attr({'x': svgPadding*5 + 15, 'y': function(d,i){ return svgHeight*i-130; }, 'width': svgPadding*2, 'height': svgPadding*2, 'font-size': 12, 'class': 'monthIndicator'})
+            .text(function(d,i){ if(d != undefined){ return moment(d).format('MMM, DD') }else{ return null;}})
+            .attr("text-anchor","end")
+            .style({'fill': '#666', 'stroke-width': 0, 'stroke': '#666'});
 
-        svg.selectAll('.elementGroup').on('mouseover', function(d,i){ // svg.selectAll('g rect').on('mouseover', function(d,i){
+        svg.selectAll('text.dayIndicator').data(dates).enter().append('text')
+            .attr({'x': svgPadding*5 + 15, 'y': function(d,i){ return svgHeight*i-150; }, 'width': svgPadding*2, 'height': svgPadding*2, 'font-size': 12, 'class': 'dayIndicator'})
+            .text(function(d,i){ if(d){ return mapDay[moment(d).day()]; } })
+            .attr("text-anchor","end")
+            .style({'fill': '#666', 'stroke-width': 0, 'stroke': '#666'});
+
+        svg.append('g').attr({'class': 'testGraph'+currentWeek});
+
+        for(var j=0; j<8; j++){
+            var testDrive = eval('structured[currentWeek].'+mapD[j]);
+            svg.select('g.testGraph'+currentWeek).selectAll('g').data(testDrive.levels).enter().append('g')
+                .attr({'class': 'elementGroup'});
+            svg.select('g.testGraph'+currentWeek).selectAll('.elementGroup').data(testDrive.levels).append('circle')
+                .attr({'r': 4, 'cx': function(d,i){ return scaleTime(testDrive.times[i], testDrive.dates[0]);}, 'cy': function(d,i){ return svgHeight*(j-1) + scaleBG(testDrive.levels[i], raw)}})
+                .style({'stroke': 'none', 'fill': 'rgba(30,30,30,0.5)'});
+
+
+            if(showValue == 1){
+                svg.select('g.testGraph'+currentWeek).selectAll('.elementGroup').data(testDrive.levels).append('text')
+                    .attr({'x': function(d,idx){ return scaleTime(testDrive.times[idx], testDrive.dates[0])-(svgWidth-10*svgPadding)/24/2 + 6;}, 'y': function(d,idx){ return svgHeight*(j-1) + scaleBG(testDrive.levels[idx], raw) + 15 }, 'font-size': 9, 'id': function(d,i){ return i;}, 'class': 'BGValue'})
+                    .text(function(d,i){ return parseInt(d);})
+                    .style({'fill': '#000000', 'stroke-width': 0, 'stroke': '#000000'});
+            }
+
+        }
+//        if(numOfWeeks == undefined){
+//            numOfWeeks = 1;
+//        }
+//
+//        for(var j=0; j<numOfWeeks; j++){
+//            var testDrive = eval('structured[j].'+day);
+//            var oneDate = new Array(testDrive.dates[0]);
+//
+//            svg.selectAll('rect.weekIndicator'+j).data(oneDate).enter().append('rect')
+//                .attr({'x': svgPadding*3+20, 'y': 8 + j*svgHeight, 'width': 35, 'height': 5, 'class': 'weekIndicator'+j})
+//                .style({'fill': function(d){ if(d != undefined){ return catColors(j)}else{ return '#ffffff';}}});
+//
+//            svg.selectAll('text.monthIndicator'+j).data(oneDate).enter().append('text')
+//                .attr({'x': svgPadding*3+24, 'y': 30 + j*svgHeight, 'width': svgPadding*2, 'height': svgPadding*2, 'font-size': 14, 'class': 'monthIndicator'+j})
+//                .text(function(d,i){ if(d != undefined){ return moment(d).format('MMM');}else{ return null;}})
+//                .style({'fill': '#999999', 'stroke-width': 0});
+//            svg.selectAll('text.dayIndicator'+j).data(oneDate).enter().append('text')
+//                .attr({'x': svgPadding*3+25, 'y': 50 + j*svgHeight, 'width': svgPadding*2, 'height': svgPadding*2, 'font-size': 20, 'class': 'dayIndicator'+j })
+//                .text(function(d,i){ if(d != undefined){ return moment(d).format('DD');}else{ return null;}})
+//                .style({'fill': '#999999', 'stroke-width': 0});
+//
+//            svg.append('g').attr({'class': 'testGraph'+j});
+//            svg.select('g.testGraph'+j).selectAll('g').data(testDrive.levels).enter().append('g')
+//                .attr({'class': 'elementGroup'});
+//            svg.select('g.testGraph'+j).selectAll('g.elementGroup').data(testDrive.levels).append('circle')
+//                .attr({'r': 4, 'cx': function(d,i){ return scaleTime(testDrive.times[i], testDrive.dates[0]);}, 'cy': function(d,i){ return svgHeight*j + scaleBG(testDrive.levels[i], raw)}})
+//                .style({'stroke': 'none', 'fill': 'rgba(30,30,30,0.5)'});
+//
+//            if(showValue == 1){
+//                svg.select('g.testGraph'+j).selectAll('g.elementGroup').data(testDrive.levels).append('text')
+//                    .attr({'x': function(d,i){ return scaleTime(testDrive.times[i], testDrive.dates[0]) - 10;}, 'y': function(d,i){return svgHeight*j + scaleBG(testDrive.levels[i], raw) + 15}, 'font-size': 9, 'id': function(d,i){ return i;}, 'class': 'BGValue'})
+//                    .text(function(d,i){ return d;})
+//                    .style({'fill': '#000000', 'stroke-width': 0, 'stroke': '#000000'});
+//            }
+//        }
+
+
+        svg.selectAll('.BGValue').on('mouseover', function(d,i){ // svg.selectAll('g rect').on('mouseover', function(d,i){
 //            var textElement = $(this).parent().find('.BGValue[id='+$(this).attr('id')+']');
 //            console.log(d3.select(textElement)[0][0]);
 
-            d3.select(this).select('.BGValue').transition().attr({'font-size': 20}); // 'y': parseInt(d3.select(textElement)[0][0].attr('y')) - 20,
+            d3.select(this).transition().attr({'font-size': 20}); // 'y': parseInt(d3.select(textElement)[0][0].attr('y')) - 20,
         });
 
-        svg.selectAll('.elementGroup').on('mouseout', function(d,i){
+        svg.selectAll('.BGValue').on('mouseout', function(d,i){
             var textElement = $(this).parent().find('.BGValue[id='+$(this).attr('id')+']');
-            d3.select(this).select('.BGValue').transition().attr({ 'font-size': 9}); //'y': parseInt(d3.select(textElement)[0][0].attr('y')) + 20,
+            d3.select(this).transition().attr({ 'font-size': 9}); //'y': parseInt(d3.select(textElement)[0][0].attr('y')) + 20,
         });
     }
 
@@ -593,13 +645,13 @@ define(['jquery','D3','queue','moment','slider'], function($, d3, queue, moment)
             .on('slideStop', function(e){
                 weeksToDisplay = $(this).val();
                 $('svg,hr').remove();
-                for(var i=0; i<7; i++){
+                for(var i=0; i<weeksToDisplay; i++){
                     svgs[i] = d3.select('.vizElement').append('svg').style({'width': svgWidth+'px', 'height': svgHeight+'px' }).attr({'id': i});
                 }
 
                 $('svg').after("<hr>");
 
-                for(var i=0; i<7; i++){
+                for(var i=0; i<weeksToDisplay; i++){
                     drawCanvas(svgs[i], $(svgs[i]).attr('id'), weeksToDisplay);
                     draw(svgs[i], weeksToDisplay, map[i]);
                 }

@@ -15,13 +15,13 @@
     @section('header')
     @show
     <!-- Place favicon.ico and apple-touch-icon.png in the root directory -->
-    <link rel="stylesheet" href="scripts/vendor/modernizr/normalize.css">
-    <link rel="stylesheet" href="scripts/vendor/modernizr/main.css">
-    <link rel="stylesheet" href="scripts/vendor/bootstrap/css/bootstrap.css">
-    <link rel="stylesheet" href="scripts/slider/css/slider.css">
-    <link rel="stylesheet" href="css/style.css">
-    <script src="scripts/vendor/modernizr/modernizr-2.6.2.min.js"></script>
-    <script data-main="@yield('main', 'scripts/main')" src="scripts/vendor/requirejs/require.js"></script>
+    <link rel="stylesheet" href="/diabetes-viz/public/scripts/vendor/modernizr/normalize.css">
+    <link rel="stylesheet" href="/diabetes-viz/public/scripts/vendor/modernizr/main.css">
+    <link rel="stylesheet" href="/diabetes-viz/public/scripts/vendor/bootstrap/css/bootstrap.css">
+    <link rel="stylesheet" href="/diabetes-viz/public/scripts/slider/css/slider.css">
+    <link rel="stylesheet" href="/diabetes-viz/public/css/style.css">
+    <script src="/diabetes-viz/public/scripts/vendor/modernizr/modernizr-2.6.2.min.js"></script>
+    <script data-main="@yield('mainscript', '/diabetes-viz/public/scripts/main')" src="/diabetes-viz/public/scripts/vendor/requirejs/require.js"></script>
 </head>
 <body>
 <!--[if lt IE 7]>

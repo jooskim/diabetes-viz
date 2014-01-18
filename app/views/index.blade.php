@@ -11,6 +11,7 @@ test
     <div class="row-fluid">
         <input type="text" class="slider" value="" data-slider-min="1" data-slider-max="4" data-slider-step="1" data-slider-value="4" data-slider-orientation="horizontal" data-slider-selection="after" data-slider-tooltip="show">
     </div>
+
 </div>
 
 
