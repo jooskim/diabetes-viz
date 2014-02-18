@@ -5,6 +5,33 @@
  * Time: 4:24 PM
  * To change this template use File | Settings | File Templates.
  */
+
+
+//alert("mode" + " = " + getQuerystringNameValue("mode"));
+function getQuerystringNameValue(name)
+{
+    // For example... passing a name parameter of "name1" will return a value of "100", etc.
+    // page.htm?name1=100&name2=101&name3=102
+
+    var winURL = window.location.href;
+    var queryStringArray = winURL.split("?");
+    var queryStringParamArray = queryStringArray[1].split("&");
+    var nameValue = null;
+
+    for ( var i=0; i<queryStringParamArray.length; i++ )
+    {           
+        queryStringNameValueArray = queryStringParamArray[i].split("=");
+
+        if ( name == queryStringNameValueArray[0] )
+        {
+            nameValue = queryStringNameValueArray[1];
+        }                       
+    }
+
+    return nameValue;
+}
+
+
 require.config({
     paths: {
         'jquery': 'vendor/jquery/jquery',
@@ -32,6 +59,7 @@ require.config({
 });
 
 
+
 define(['jquery','D3','queue','moment','slider'], function($, d3, queue, moment){
     var raw = [];
     var structured = [];
@@ -42,7 +70,8 @@ define(['jquery','D3','queue','moment','slider'], function($, d3, queue, moment)
     var svgPadding = 20;
 
     // debug
-    var mode = 0; // 0 for scatter plot, 1 for heatmap, 2 for shape
+    var mode = getQuerystringNameValue("mode"); // 0 for scatter plot, 1 for heatmap, 2 for shape
+    if (mode == "") mode = 0;
     var showValue = 1;
 
     /*
@@ -640,6 +669,7 @@ define(['jquery','D3','queue','moment','slider'], function($, d3, queue, moment)
             var drawCanvas = drawShapeCanvas;
             var draw = drawShape;
         }
+        $('input:radio[name="viewmode"][value="'+mode+'"]').prop('checked', true);
 
         $('.slider').slider({'tooltip': 'show'})
             .on('slideStop', function(e){
@@ -657,6 +687,58 @@ define(['jquery','D3','queue','moment','slider'], function($, d3, queue, moment)
                 }
 //                console.log($(this).val());
             });
+
+        // toggle viewmode
+        $('.viewmode').click(function() {
+            window.location.href = "/diabetes-viz/public/?mode=" + $(this).val();
+        });
+
+        // toggle buttons
+        $(".cb-enable").click(function(){
+            var parent = $(this).parents('.switch');
+            $('.cb-disable',parent).removeClass('selected');
+            $(this).addClass('selected');
+
+            var toggle_id = $(this).attr('id');
+            switch(toggle_id) {
+                case "toggle_numbers":
+                    $('.BGValue').show();
+                    break;
+                case "toggle_mealtime":
+                    $('.breakfastBracket').show();
+                    $('.lunchBracket').show();
+                    $('.dinnerBracket').show();
+                    break;
+                case "toggle_":
+                    break;
+                case "toggle__":
+                    break;
+
+            }
+        });
+        $(".cb-disable").click(function(){
+            var parent = $(this).parents('.switch');
+            $('.cb-enable',parent).removeClass('selected');
+            $(this).addClass('selected');
+
+            var toggle_id = $(this).attr('id');
+            switch(toggle_id) {
+                case "toggle_numbers":
+                    $('.BGValue').hide();
+                    break;
+                case "toggle_mealtime":
+                    $('.breakfastBracket').hide();
+                    $('.lunchBracket').hide();
+                    $('.dinnerBracket').hide();
+                    break;
+                case "toggle_":
+                    break;
+                case "toggle__":
+                    break;
+
+            }
+        });
+
 
         $('div.spinner').hide();
         structureData();

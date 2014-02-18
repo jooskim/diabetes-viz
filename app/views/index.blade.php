@@ -11,6 +11,35 @@ test
     <div class="row-fluid">
         <input type="text" class="slider" value="" data-slider-min="1" data-slider-max="4" data-slider-step="1" data-slider-value="4" data-slider-orientation="horizontal" data-slider-selection="after" data-slider-tooltip="show">
     </div>
+    
+    <div style="padding-top:10px;padding-bottom:10px"><hr></div>
+
+    <div class="row-fluid">
+        <h5>View Mode</h5>
+    </div>
+    <div class="row-fluid">
+        <input type="radio" id="viewmode" name="viewmode" class="viewmode" value="0"> Scatter Plot
+        <input type="radio" id="viewmode" name="viewmode" class="viewmode" value="1"> Heat Map
+        <input type="radio" id="viewmode" name="viewmode" class="viewmode" value="2"> Shape
+    </div>
+    
+    <div style="padding-top:10px;padding-bottom:10px"><hr></div>
+
+    <div class="row-fluid">
+	<div class="field switch">
+		<label class="cb-enable selected" id="toggle_numbers"><span>On</span></label>
+		<label class="cb-disable" id="toggle_numbers"><span>Off</span></label>
+		&nbsp; Numbers
+	</div>
+    </div>
+    <div class="row-fluid">
+	<div class="field switch">
+		<label class="cb-enable selected" id="toggle_mealtime"><span>On</span></label>
+		<label class="cb-disable" id="toggle_mealtime"><span>Off</span></label>
+		&nbsp; Meal Time
+	</div>
+    </div>
+
 
 </div>
 
