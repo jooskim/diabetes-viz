@@ -13,21 +13,23 @@ function getQuerystringNameValue(name)
     // For example... passing a name parameter of "name1" will return a value of "100", etc.
     // page.htm?name1=100&name2=101&name3=102
 
-    var winURL = window.location.href;
-    var queryStringArray = winURL.split("?");
-    var queryStringParamArray = queryStringArray[1].split("&");
     var nameValue = null;
+    var winURL = window.location.href;
 
-    for ( var i=0; i<queryStringParamArray.length; i++ )
-    {           
-        queryStringNameValueArray = queryStringParamArray[i].split("=");
+    if (winURL.indexOf("?") > 0) { 
+        var queryStringArray = winURL.split("?");
+        var queryStringParamArray = queryStringArray[1].split("&");
 
-        if ( name == queryStringNameValueArray[0] )
-        {
-            nameValue = queryStringNameValueArray[1];
-        }                       
+        for ( var i=0; i<queryStringParamArray.length; i++ )
+        {           
+            queryStringNameValueArray = queryStringParamArray[i].split("=");
+
+            if ( name == queryStringNameValueArray[0] )
+            {
+                nameValue = queryStringNameValueArray[1];
+            }                       
+        }
     }
-
     return nameValue;
 }
 
@@ -71,7 +73,7 @@ define(['jquery','D3','queue','moment','slider'], function($, d3, queue, moment)
 
     // debug
     var mode = getQuerystringNameValue("mode"); // 0 for scatter plot, 1 for heatmap, 2 for shape
-    if (mode == "") mode = 0;
+    if (mode == null) mode = 0;
     var showValue = 1;
 
     /*
