@@ -70,7 +70,7 @@ define(['jquery','D3','queue','moment','slider'], function($, d3, queue, moment)
     var svgWidth = 900;
     var svgHeight = 180;
     var svgPadding = 20;
-
+    
     // debug
     var mode = getQuerystringNameValue("mode"); // 0 for scatter plot, 1 for heatmap, 2 for shape
     if (mode == null) mode = 0;
