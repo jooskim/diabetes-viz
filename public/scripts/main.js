@@ -506,7 +506,7 @@ define(['jquery','D3','queue','moment','slider'], function($, d3, queue, moment)
             .attr({x: svgPadding*1-10+20, y: svgPadding-35, 'transform': 'rotate(90)', 'font-size': 25, "class": "weekIndicator"})
             .style({'fill':'#666666', 'stroke-width':0});
 
-        for(var i=0; i<8; i++){
+        for(var i=0; i<7; i++){
             svg.append('line')
                 .attr({x1: svgPadding*8, x2: svgWidth - svgPadding, y1: svgHeight - svgPadding + i * svgHeight, y2: svgHeight - svgPadding + i * svgHeight })
                 .style({'stroke': '#999', 'stroke-width': 1});
@@ -520,7 +520,7 @@ define(['jquery','D3','queue','moment','slider'], function($, d3, queue, moment)
         var ticksTime = ["12:00 AM","3:00 AM","6:00 AM","9:00 AM","12:00 PM","3:00 PM","6:00 PM","9:00 PM","11:59 PM"];
 
 
-        for(var j=0; j<8; j++){
+        for(var j=0; j<7; j++){
             svg.append('rect')
                 .attr({x: scaleTimeHeatmap("06:00 AM", "2013-08-10"), y: svgPadding-10+j*svgHeight, width: scaleTimeHeatmap("09:00 AM", "2013-08-10") - scaleTimeHeatmap("06:00 AM", "2013-08-10"), "class": "breakfastBracket", "height": 149})
                 .style({"fill": "#eeeeee"});
@@ -552,7 +552,7 @@ define(['jquery','D3','queue','moment','slider'], function($, d3, queue, moment)
         }
 
         // draw the normal range
-        for(var j=0; j<8; j++){
+        for(var j=0; j<7; j++){
             svg.append('rect')
                 .attr({'x': svgPadding*8, 'y': scaleBG(120, raw)+j*svgHeight, 'width': svgWidth - svgPadding*9, 'height': parseFloat(scaleBG(70, raw) - scaleBG(120,raw))})
                 .style({'fill': 'rgba(200,200,200,0.5)'});
@@ -575,37 +575,37 @@ define(['jquery','D3','queue','moment','slider'], function($, d3, queue, moment)
         var mapD = {0: "prevsat", 1: "sunday", 2: "monday", 3: "tuesday", 4: "wednesday", 5: "thursday", 6: "friday", 7: "saturday"};
         var dates = [];
 
-        for(var i=0; i<8; i++){
+        for(var i=0; i<7; i++){
             dates.push(eval("structured[currentWeek]."+mapD[i]+".dates[0]"));
 
         }
 
         svg.selectAll('text.monthIndicator').data(dates).enter().append('text')
-            .attr({'x': svgPadding*5 + 15, 'y': function(d,i){ return svgHeight*i-130; }, 'width': svgPadding*2, 'height': svgPadding*2, 'font-size': 12, 'class': 'monthIndicator'})
+            .attr({'x': svgPadding*5 + 15, 'y': function(d,i){ return svgHeight*(i+1)-130; }, 'width': svgPadding*2, 'height': svgPadding*2, 'font-size': 12, 'class': 'monthIndicator'})
             .text(function(d,i){ if(d != undefined){ return moment(d).format('MMM, DD') }else{ return null;}})
             .attr("text-anchor","end")
             .style({'fill': '#666', 'stroke-width': 0, 'stroke': '#666'});
 
         svg.selectAll('text.dayIndicator').data(dates).enter().append('text')
-            .attr({'x': svgPadding*5 + 15, 'y': function(d,i){ return svgHeight*i-150; }, 'width': svgPadding*2, 'height': svgPadding*2, 'font-size': 12, 'class': 'dayIndicator'})
+            .attr({'x': svgPadding*5 + 15, 'y': function(d,i){ return svgHeight*(i+1)-150; }, 'width': svgPadding*2, 'height': svgPadding*2, 'font-size': 12, 'class': 'dayIndicator'})
             .text(function(d,i){ if(d){ return mapDay[moment(d).day()]; } })
             .attr("text-anchor","end")
             .style({'fill': '#666', 'stroke-width': 0, 'stroke': '#666'});
 
         svg.append('g').attr({'class': 'testGraph'+currentWeek});
 
-        for(var j=0; j<8; j++){
+        for(var j=0; j<7; j++){
             var testDrive = eval('structured[currentWeek].'+mapD[j]);
             svg.select('g.testGraph'+currentWeek).selectAll('g').data(testDrive.levels).enter().append('g')
                 .attr({'class': 'elementGroup'});
             svg.select('g.testGraph'+currentWeek).selectAll('.elementGroup').data(testDrive.levels).append('circle')
-                .attr({'r': 4, 'cx': function(d,i){ return scaleTime(testDrive.times[i], testDrive.dates[0]);}, 'cy': function(d,i){ return svgHeight*(j-1) + scaleBG(testDrive.levels[i], raw)}, 'class': 'path' + ' ' + mapD[j]})
+                .attr({'r': 4, 'cx': function(d,i){ return scaleTime(testDrive.times[i], testDrive.dates[0]);}, 'cy': function(d,i){ return svgHeight*(j) + scaleBG(testDrive.levels[i], raw)}, 'class': 'path' + ' ' + mapD[j]})
                 .style({'stroke': 'none', 'fill': 'rgba(30,30,30,0.5)'});
 
 
             //if(showValue == 1){
                 svg.select('g.testGraph'+currentWeek).selectAll('.elementGroup').data(testDrive.levels).append('text')
-                    .attr({'x': function(d,idx){ return scaleTime(testDrive.times[idx], testDrive.dates[0])-(svgWidth-10*svgPadding)/24/2 + 6;}, 'y': function(d,idx){ return svgHeight*(j-1) + scaleBG(testDrive.levels[idx], raw) + 15 }, 'font-size': 9, 'id': function(d,i){ return i;}, 'class': 'BGValue' + ' ' +mapD[j]})
+                    .attr({'x': function(d,idx){ return scaleTime(testDrive.times[idx], testDrive.dates[0])-(svgWidth-10*svgPadding)/24/2 + 6;}, 'y': function(d,idx){ return svgHeight*(j) + scaleBG(testDrive.levels[idx], raw) + 15 }, 'font-size': 9, 'id': function(d,i){ return i;}, 'class': 'BGValue' + ' ' +mapD[j]})
                     .text(function(d,i){ return parseInt(d);})
                     .style({'fill': '#000000', 'stroke-width': 0, 'stroke': '#000000'});
             //}
