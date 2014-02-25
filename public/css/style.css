@@ -13,6 +13,11 @@ body {
 
 }
 
+.BGValue.monday {
+	color:ff0000;
+}
+
+
 hr {
     margin: 0;
 }

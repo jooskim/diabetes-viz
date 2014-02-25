@@ -32,14 +32,30 @@ test
 		&nbsp; Numbers
 	</div>
     </div>
+
     <div class="row-fluid">
-	<div class="field switch">
-		<label class="cb-enable selected" id="toggle_mealtime"><span>On</span></label>
-		<label class="cb-disable" id="toggle_mealtime"><span>Off</span></label>
-		&nbsp; Meal Time
-	</div>
+    <div class="field switch">
+        <label class="cb-enable selected" id="toggle_mealtime"><span>On</span></label>
+        <label class="cb-disable" id="toggle_mealtime"><span>Off</span></label>
+        &nbsp; Meal Time
+    </div>
     </div>
 
+    <div class="row-fluid">
+    <div class="field switch">
+        <label class="cb-enable selected" id="toggle_weekdays"><span>On</span></label>
+        <label class="cb-disable" id="toggle_weekdays"><span>Off</span></label>
+        &nbsp; Weekdays
+    </div>
+    </div>
+
+    <div class="row-fluid">
+    <div class="field switch">
+        <label class="cb-enable selected" id="toggle_weekends"><span>On</span></label>
+        <label class="cb-disable" id="toggle_weekends"><span>Off</span></label>
+        &nbsp; Weekends
+    </div>
+    </div>
 
 </div>
 
