@@ -57,6 +57,7 @@ require.config({
         'slider': {
             deps: ['jquery']
         }
+
     }
 });
 
@@ -70,7 +71,7 @@ define(['jquery','D3','queue','moment','slider'], function($, d3, queue, moment)
     var svgWidth = 900;
     var svgHeight = 180;
     var svgPadding = 20;
-    
+
     // debug
     var mode = getQuerystringNameValue("mode"); // 0 for scatter plot, 1 for heatmap, 2 for shape
     if (mode == null) mode = 0;
@@ -675,7 +676,7 @@ define(['jquery','D3','queue','moment','slider'], function($, d3, queue, moment)
 
         $('input:radio[name="viewmode"][value="'+mode+'"]').prop('checked', true);
 
-        $('.slider').slider({'tooltip': 'show'})
+        $('.slider.weeks').slider({'tooltip': 'show'})
             .on('slideStop', function(e){
                 weeksToDisplay = $(this).val();
                 $('svg,hr').remove();
@@ -691,6 +692,8 @@ define(['jquery','D3','queue','moment','slider'], function($, d3, queue, moment)
                 }
 //                console.log($(this).val());
             });
+		
+		$(".slider.normalrange").slider({});
 
         // toggle viewmode
         $('.viewmode').click(function() {

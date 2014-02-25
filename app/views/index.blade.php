@@ -9,7 +9,7 @@ test
         <h5>Number of Weeks to Display</h5>
     </div>
     <div class="row-fluid">
-        <input type="text" class="slider" value="" data-slider-min="1" data-slider-max="4" data-slider-step="1" data-slider-value="4" data-slider-orientation="horizontal" data-slider-selection="after" data-slider-tooltip="show">
+        <input type="text" class="slider weeks" value="" data-slider-min="1" data-slider-max="4" data-slider-step="1" data-slider-value="4" data-slider-orientation="horizontal" data-slider-selection="after" data-slider-tooltip="show">
     </div>
     
     <div style="padding-top:10px;padding-bottom:10px"><hr></div>
@@ -23,6 +23,16 @@ test
         <input type="radio" id="viewmode" name="viewmode" class="viewmode" value="2"> Shape
     </div>
     
+    <div style="padding-top:10px;padding-bottom:10px"><hr></div>
+
+    <div class="row-fluid">
+        <h5>Normal Range</h5>
+    </div>
+    <div class="row-fluid">
+        <!--b>50</b--> <input id="ex2" type="text" class="slider normalrange" value="" data-slider-min="50" data-slider-max="150" data-slider-step="5" data-slider-value="[70,120]" data-slider-orientation="horizontal"/>
+        <!--b>150</b-->
+    </div>
+
     <div style="padding-top:10px;padding-bottom:10px"><hr></div>
 
     <div class="row-fluid">
