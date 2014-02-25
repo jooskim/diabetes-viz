@@ -57,6 +57,17 @@ test
     </div>
     </div>
 
+    <div style="padding-top:10px;padding-bottom:10px"><hr></div>
+
+    <div class="scatter">
+    <div class="row-fluid">
+    <div class="field switch">
+        <label class="cb-enable selected" id="toggle_normalrange"><span>On</span></label>
+        <label class="cb-disable" id="toggle_normalrange"><span>Off</span></label>
+        &nbsp; Normal Range
+    </div>
+    </div>
+    </div>
 </div>
 
 

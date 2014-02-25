@@ -554,7 +554,7 @@ define(['jquery','D3','queue','moment','slider'], function($, d3, queue, moment)
         // draw the normal range
         for(var j=0; j<7; j++){
             svg.append('rect')
-                .attr({'x': svgPadding*8, 'y': scaleBG(120, raw)+j*svgHeight, 'width': svgWidth - svgPadding*9, 'height': parseFloat(scaleBG(70, raw) - scaleBG(120,raw))})
+                .attr({'class':'normalrange', 'x': svgPadding*8, 'y': scaleBG(120, raw)+j*svgHeight, 'width': svgWidth - svgPadding*9, 'height': parseFloat(scaleBG(70, raw) - scaleBG(120,raw))})
                 .style({'fill': 'rgba(200,200,200,0.5)'});
         }
 
@@ -672,6 +672,7 @@ define(['jquery','D3','queue','moment','slider'], function($, d3, queue, moment)
             var drawCanvas = drawShapeCanvas;
             var draw = drawShape;
         }
+
         $('input:radio[name="viewmode"][value="'+mode+'"]').prop('checked', true);
 
         $('.slider').slider({'tooltip': 'show'})
@@ -734,7 +735,9 @@ define(['jquery','D3','queue','moment','slider'], function($, d3, queue, moment)
     	            	d3.selectAll('.path.prevsat, .path.saturday, .path.sunday').style("stroke", "rgba(110,110,110,0.8)");
 	                }
                     break;
-
+                case "toggle_normalrange":
+                	$('.normalrange').show();
+                	break;
             }
         });
         $(".cb-disable").click(function(){
@@ -776,6 +779,9 @@ define(['jquery','D3','queue','moment','slider'], function($, d3, queue, moment)
                 		d3.selectAll('.path.prevsat, .path.saturday, .path.sunday').style("stroke", "rgba(110,110,110,0.4)");
                 	}
                     break;
+                case "toggle_normalrange":
+                	$('.normalrange').hide();
+                	break;
             }
         });
 
@@ -810,6 +816,11 @@ define(['jquery','D3','queue','moment','slider'], function($, d3, queue, moment)
         console.log(structured);
 
 
+        if (mode == 0) {
+        	$('.scatter').show();
+        } else {
+        	$('.scatter').hide();
+        }
     }
 
 });
