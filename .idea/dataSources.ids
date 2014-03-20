@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component name="dataSourceStorage">
+  <data-source source="LOCAL" name="Data Source" uuid="b058e54a-ef71-4df3-a094-5f1d21a8afae">
+    <database-info product="SQLite" version="3.6.14.2" jdbc-version="2.1" driver-name="SQLiteJDBC" driver-version="native"/>
+    <case-sensitivity plain-identifiers="mixed" quoted-identifiers="mixed"/>
+    <schema name="" catalog=""/>
+    <table name="BG" schema="" catalog="" type="TABLE">
+      <column name="id" sqlType="INTEGER" length="2000000000" precision="10" nullable="false" jdbcType="12"/>
+      <column name="createdDate" sqlType="DATE" length="2000000000" precision="10" nullable="false" jdbcType="12"/>
+      <column name="createdTime" sqlType="TIME" length="2000000000" precision="10" nullable="false" jdbcType="12"/>
+      <column name="level" sqlType="FLOAT" length="2000000000" precision="10" nullable="false" jdbcType="12"/>
+      <column name="note" sqlType="VARCHAR" length="2000000000" precision="10" nullable="true" jdbcType="12"/>
+      <primary-key columns="id"/>
+    </table>
+    <table name="INSULIN" schema="" catalog="" type="TABLE">
+      <column name="id" sqlType="INTEGER" length="2000000000" precision="10" nullable="false" jdbcType="12"/>
+      <column name="type" sqlType="VARCHAR" length="2000000000" precision="10" nullable="false" jdbcType="12"/>
+      <column name="carbDose" sqlType="FLOAT" length="2000000000" precision="10" nullable="true" jdbcType="12"/>
+      <column name="correctionDose" sqlType="FLOAT" length="2000000000" precision="10" nullable="true" jdbcType="12"/>
+      <column name="hourlyBasalDose" sqlType="FLOAT" length="2000000000" precision="10" nullable="true" jdbcType="12"/>
+      <column name="createdDate" sqlType="DATE" length="2000000000" precision="10" nullable="false" jdbcType="12"/>
+      <column name="createdTime" sqlType="TIME" length="2000000000" precision="10" nullable="false" jdbcType="12"/>
+      <column name="note" sqlType="VARCHAR" length="2000000000" precision="10" nullable="true" jdbcType="12"/>
+      <primary-key columns="id"/>
+    </table>
+    <table name="MIGRATIONS" schema="" catalog="" type="TABLE">
+      <column name="migration" sqlType="VARCHAR" length="2000000000" precision="10" nullable="false" jdbcType="12"/>
+      <column name="batch" sqlType="INTEGER" length="2000000000" precision="10" nullable="false" jdbcType="12"/>
+    </table>
+    <table name="SQLITE_SEQUENCE" schema="" catalog="" type="TABLE">
+      <column name="name" sqlType="" length="2000000000" precision="10" nullable="true" jdbcType="12"/>
+      <column name="seq" sqlType="" length="2000000000" precision="10" nullable="true" jdbcType="12"/>
+    </table>
+    <table name="USERS" schema="" catalog="" type="TABLE">
+      <column name="id" sqlType="INTEGER" length="2000000000" precision="10" nullable="false" jdbcType="12"/>
+      <column name="email" sqlType="VARCHAR" length="2000000000" precision="10" nullable="false" jdbcType="12"/>
+      <column name="password" sqlType="VARCHAR" length="2000000000" precision="10" nullable="false" jdbcType="12"/>
+      <primary-key columns="id"/>
+    </table>
+  </data-source>
+</component>

@@ -19,6 +19,7 @@
     <link rel="stylesheet" href="/diabetes-viz/public/scripts/vendor/modernizr/main.css">
     <link rel="stylesheet" href="/diabetes-viz/public/scripts/vendor/bootstrap/css/bootstrap.css">
     <link rel="stylesheet" href="/diabetes-viz/public/scripts/slider/css/slider.css">
+    <link rel="stylesheet" href="/diabetes-viz/public/scripts/datepicker/css/datepicker.css">
     <link rel="stylesheet" href="/diabetes-viz/public/css/style.css">
     <script src="/diabetes-viz/public/scripts/vendor/modernizr/modernizr-2.6.2.min.js"></script>
     <script data-main="@yield('mainscript', '/diabetes-viz/public/scripts/main')" src="/diabetes-viz/public/scripts/vendor/requirejs/require.js"></script>

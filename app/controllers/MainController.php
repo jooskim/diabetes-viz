@@ -11,7 +11,8 @@ class MainController extends \BaseController {
 	{
 //        $table = DB::table('BG')->get();
 //        $table = DB::select("SELECT * FROM BG WHERE createdDate >= date('2013-07-01') AND createdDate < date('2013-09-16')");
-		return View::make('index');
+
+        return View::make('index', array('totalRecords' => count(DB::select("select * from BG where 1"))));
 	}
 
 	/**

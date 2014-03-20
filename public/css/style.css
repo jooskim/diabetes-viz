@@ -14,7 +14,7 @@ body {
 }
 
 .BGValue.monday {
-	color:ff0000;
+	color: #ff0000;
 }
 
 
@@ -23,7 +23,7 @@ hr {
 }
 
 /* switch effect */
-.field { float: left; margin: 0px 10px 10px 0px;}
+.field { float: left;}
 
 .cb-enable, .cb-disable, .cb-enable span, .cb-disable span { background: url(../images/switch.gif) repeat-x; display: block; float: left; }
 .cb-enable span, .cb-disable span { line-height: 30px; display: block; background-repeat: no-repeat; font-weight: bold; }

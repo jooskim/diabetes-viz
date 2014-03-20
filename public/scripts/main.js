@@ -41,7 +41,8 @@ require.config({
         'queue': 'vendor/d3/queue.v1.min',
         'moment': 'vendor/momentjs/moment.min',
         'bootstrap': 'vendor/bootstrap/bootstrap',
-        'slider': 'slider/js/bootstrap-slider'
+        'slider': 'slider/js/bootstrap-slider',
+        'datepicker': 'datepicker/js/bootstrap-datepicker'
     },
     shim: {
         'D3': {
@@ -56,21 +57,28 @@ require.config({
         },
         'slider': {
             deps: ['jquery']
+        },
+        'datepicker': {
+            deps: ['jquery']
         }
 
     }
 });
 
 
-
-define(['jquery','D3','queue','moment','slider'], function($, d3, queue, moment){
+define(['jquery','D3','queue','moment','slider','datepicker'], function($, d3, queue, moment){
     var raw = [];
     var structured = [];
+    var dateSel = '';
     var maximumBG = 420;
     var weeksToDisplay = 4;
     var svgWidth = 900;
     var svgHeight = 180;
     var svgPadding = 20;
+
+    // thresholds for BG value
+    var low = 70;
+    var high = 120;
 
     // debug
     var mode = getQuerystringNameValue("mode"); // 0 for scatter plot, 1 for heatmap, 2 for shape
@@ -95,16 +103,34 @@ define(['jquery','D3','queue','moment','slider'], function($, d3, queue, moment)
 
     */
 
-    queue()
-        .defer(function(i, callback){
-            d3.json("bg/2013-07-01/2013-09-16/", function(d){
-                d.forEach(function(data){
-                    raw.push(data);
-                });
-                callback(null,i);
-            })
-        }, 'bg')
-        .await(run);
+    function loadData(date){
+        if(date == ''){
+            // default data
+            var startDate = '2013-07-01';
+            var endDate = '2013-09-16';
+        }else{
+            $('svg,hr').remove();
+            var d = new Date(date);
+            var startDate = moment(d).format('YYYY-MM-DD');
+            var endDate = moment(d.getTime() + 1000*60*60*24*7*4).format('YYYY-MM-DD'); // + 4 weeks
+        }
+
+        console.log(startDate, endDate);
+
+        queue()
+            .defer(function(i, callback){
+                d3.json("bg/"+startDate+"/"+endDate+"/", function(d){
+                    structured = [];
+                    raw = [];
+                    d.forEach(function(data){
+                        raw.push(data);
+                    });
+                    callback(null,i);
+                })
+            }, 'bg')
+            .await(run);
+    }
+
 
     function unique(list) {
         var result = [];
@@ -223,15 +249,15 @@ define(['jquery','D3','queue','moment','slider'], function($, d3, queue, moment)
 
         for(var i=0; i<7; i++){
             var testDrive = eval('structured[currentWeek].'+mapD[i]);
-            svg.select('g.testGraph'+currentWeek).selectAll('g').data(testDrive.levels).enter().append('g')
-                .attr({'class': 'elementGroup'});
-            svg.select('g.testGraph'+currentWeek).selectAll('.elementGroup').data(testDrive.levels).append('path')
+            var group = svg.select('g.testGraph'+currentWeek).selectAll('g#day'+i).data(testDrive.levels).enter().append('g')
+                .attr({'class': 'elementGroup', 'id': 'day'+i});
+            group.append('path')
                 .attr({
                     'd': function(d,idx){
                         var dPath = 'M '+parseInt(scaleTimeHeatmap(testDrive.times[idx], testDrive.dates[0]))+' '+parseInt(svgPadding-10 + i*39);
-                        if(d>180){ // draw circle
+                        if(parseInt(d)>high){ // draw circle
                             dPath += ' m -14.5, 14.5 a 14.5,14.5 0 1, 0 29, 0 a 14.5,14.5 0 1,0 -29,0';
-                        }else if(d<=180 && d>70){
+                        }else if(parseInt(d)<=high && parseInt(d)>low){
                             dPath += ' m -14.5, 0 l 29 0 l 0 29 l -29 0 l 0 -29'; // m 14.5, 29 l 14.5 0 l 0 -29 l -29 0 l 0 29 l 14.5 0';
                         }else{
                             dPath += ' m 0, 0 l -14.5 29 l 29 0 l -14.5 -29';
@@ -241,27 +267,63 @@ define(['jquery','D3','queue','moment','slider'], function($, d3, queue, moment)
                         return i;},
                     'class': 'path' + ' ' + mapD[i]
                 })
-                .attr({"stroke-dasharray":function(d,i){ if(d<=180 && d>70){ return "5,5" }else{ return ""} }})
+                .attr({"stroke-dasharray":function(d,i){ if(parseInt(d)<=high && parseInt(d)>low){ return "5,5" }else{ return ""} }})
                 .style({'fill': '#ffffff'})
-                .style({'stroke': function(d,i){ if(d>180 || d<=70){ return 'rgba(110,110,110,0.8)' }else{return 'rgba(110,110,110,0.8)'} }, 'stroke-width': function(d,i){ if(d>180 || d<=70){ return 3;} else{ return 1; }} });
+                .style({'stroke': function(d,i){ if(parseInt(d)>high || parseInt(d)<=low){ return 'rgba(110,110,110,0.8)' }else{return 'rgba(110,110,110,0.8)'} }, 'stroke-width': function(d,i){ if(parseInt(d)>high || parseInt(d)<=low){ return 3;} else{ return 1; }} });
 
-            //if(showValue == 1){
-                svg.select('g.testGraph'+currentWeek).selectAll('.elementGroup').data(testDrive.levels).append('text')
-                    .attr({'x': function(d,idx){ return scaleTimeHeatmap(testDrive.times[idx], testDrive.dates[0])-(svgWidth-10*svgPadding)/24/2 + 6;}, 'y': svgPadding+ 10 + i*39, 'font-size': 9, 'id': function(d,i){ return i;}, 'class': 'BGValue' + ' ' +mapD[i]})
-                    .text(function(d,i){ return parseInt(d);})
-                    .style({'fill': '#000000', 'stroke-width': 0, 'stroke': '#000000'});
-            //}
+            group.append('text')
+                .attr({'x': function(d,idx){ return scaleTimeHeatmap(testDrive.times[idx], testDrive.dates[0])-(svgWidth-10*svgPadding)/24/2 + 6;}, 'y': svgPadding+ 10 + i*39, 'font-size': 9, 'id': function(d,i){ return i;}, 'class': 'BGValue' + ' ' +mapD[i]})
+                .text(function(d,i){ return parseInt(d);})
+                .style({'fill': '#000000', 'stroke-width': 0, 'stroke': '#000000'});
 
         }
 
-        svg.selectAll('.BGValue').on('mouseover', function(d,i){ // svg.selectAll('g rect').on('mouseover', function(d,i){
+        $(".slider.normalrange").slider()
+            .on('slideStop', function(e){
+                var lohi = $('.normalController .tooltip-inner').text().replace(/\s/g,'').split(':');
+                low = lohi[0];
+                high = lohi[1];
+                svg.select('g.testGraph'+currentWeek).selectAll('g.elementGroup').selectAll('path,text').remove();
 
-            d3.select(this).transition().attr({'font-size': 20}); // 'y': parseInt(d3.select(textElement)[0][0].attr('y')) - 20,
+                for(var i=0; i<7; i++){
+                    var testDrive = eval('structured[currentWeek].'+mapD[i]);
+                    var group = svg.select('g.testGraph'+currentWeek).selectAll('g#day'+i);
+                    group.append('path')
+                        .attr({
+                            'd': function(d,idx){
+                                var dPath = 'M '+parseInt(scaleTimeHeatmap(testDrive.times[idx], testDrive.dates[0]))+' '+parseInt(svgPadding-10 + i*39);
+                                if(parseInt(d)>high){ // draw circle
+                                    dPath += ' m -14.5, 14.5 a 14.5,14.5 0 1, 0 29, 0 a 14.5,14.5 0 1,0 -29,0';
+                                }else if(parseInt(d)<=high && parseInt(d)>low){
+                                    dPath += ' m -14.5, 0 l 29 0 l 0 29 l -29 0 l 0 -29'; // m 14.5, 29 l 14.5 0 l 0 -29 l -29 0 l 0 29 l 14.5 0';
+                                }else{
+                                    dPath += ' m 0, 0 l -14.5 29 l 29 0 l -14.5 -29';
+                                }
+                                return dPath;},
+                            'id': function(d,i){
+                                return i;},
+                            'class': 'path' + ' ' + mapD[i]
+                        })
+                        .attr({"stroke-dasharray":function(d,i){ if(parseInt(d)<=high && parseInt(d)>low){ return "5,5" }else{ return ""} }})
+                        .style({'fill': '#ffffff'})
+                        .style({'stroke': function(d,i){ if(parseInt(d)>high || parseInt(d)<=low){ return 'rgba(110,110,110,0.8)' }else{return 'rgba(110,110,110,0.8)'} }, 'stroke-width': function(d,i){ if(parseInt(d)>high || parseInt(d)<=low){ return 3;} else{ return 1; }} });
+
+                    group.append('text')
+                        .attr({'x': function(d,idx){ return scaleTimeHeatmap(testDrive.times[idx], testDrive.dates[0])-(svgWidth-10*svgPadding)/24/2 + 6;}, 'y': svgPadding+ 10 + i*39, 'font-size': 9, 'id': function(d,i){ return i;}, 'class': 'BGValue' + ' ' +mapD[i]})
+                        .text(function(d,i){ return parseInt(d);})
+                        .style({'fill': '#000000', 'stroke-width': 0, 'stroke': '#000000'});
+
+                }
+
+            });
+
+        svg.selectAll('.elementGroup').on('mouseover', function(d,i){ // svg.selectAll('g rect').on('mouseover', function(d,i){
+            d3.select(this).select('text').transition().attr({'font-size': 20}); // 'y': parseInt(d3.select(textElement)[0][0].attr('y')) - 20,
         });
 
-        svg.selectAll('.BGValue').on('mouseout', function(d,i){
-            var textElement = $(this).parent().find('.BGValue[id='+$(this).attr('id')+']');
-            d3.select(this).transition().attr({ 'font-size': 9}); //'y': parseInt(d3.select(textElement)[0][0].attr('y')) + 20,
+        svg.selectAll('.elementGroup').on('mouseout', function(d,i){
+//            var textElement = $(this).parent().find('.BGValue[id='+$(this).attr('id')+']');
+            d3.select(this).select('text').transition().attr({ 'font-size': 9}); //'y': parseInt(d3.select(textElement)[0][0].attr('y')) + 20,
         });
 
 
@@ -409,60 +471,98 @@ define(['jquery','D3','queue','moment','slider'], function($, d3, queue, moment)
 
         for(var i=0; i<7; i++){
             var testDrive = eval('structured[currentWeek].'+mapD[i]);
-            svg.select('g.testGraph'+currentWeek).selectAll('g').data(testDrive.levels).enter().append('g')
-                .attr({'class': 'elementGroup'});
-            svg.select('g.testGraph'+currentWeek).selectAll('.elementGroup').data(testDrive.levels).append('circle')
+
+
+            var group = svg.select('g.testGraph'+currentWeek).selectAll('g#day'+i).data(testDrive.levels).enter().append('g')
+                .attr({'class': 'elementGroup','id': 'day'+i});
+            group.append('circle')
                 .attr({'cx': function(d,idx){ return scaleTimeHeatmap(testDrive.times[idx], testDrive.dates[0]);}, 'cy': svgPadding-10 + 14.5 + i*39, 'r': 14.5, 'id': function(d,idx){ return idx;}, 'class': 'path' + ' ' + mapD[i] })
                 .style({'stroke': 'none', 'fill-opacity': 0.65, 'fill': function(d,idx){
                     var h=0;
                     var s=0;
                     var l=0;
 
-                    if(d>180){
-                        var sRangeFunc = d3.scale.linear().domain([121, maximumBG]).range([0, 100]);
-                        var lRangeFunc = d3.scale.pow().domain([121, maximumBG]).range([63, 55]);
+                    if(d>high){
+                        var sRangeFunc = d3.scale.linear().domain([parseInt(high)+1, maximumBG]).range([0, 100]);
+                        var lRangeFunc = d3.scale.pow().domain([parseInt(high)+1, maximumBG]).range([63, 55]);
 
                         if(d>maximumBG){
                             s=100;
-                            l=100;
+                            l=55;
                         }else{
                             s=sRangeFunc(d);
                             l=lRangeFunc(d);
                         }
-                    }else if(d<=180 && d>70){
+                    }else if(d<=high && d>low){
                         s=0;
                         l=60;
                     }else{
                         h=224;
-                        var sRangeFunc = d3.scale.linear().domain([0, 120]).range([100,0]);
-                        var lRangeFunc = d3.scale.linear().domain([0, 120]).range([36,63])
+                        var sRangeFunc = d3.scale.linear().domain([0, low]).range([100,0]);
+                        var lRangeFunc = d3.scale.linear().domain([0, low]).range([36,63])
                         s=sRangeFunc(d);
                         l=lRangeFunc(d);
                     }
                     return 'hsl('+h+','+s+'%,'+l+'%)';
                 }
                 });
+            group.append('text')
+                .attr({'x': function(d,idx){ return scaleTimeHeatmap(testDrive.times[idx], testDrive.dates[0]) - 8;}, 'y': svgPadding+ 10 + i*39, 'font-size': 9, 'id': function(d,idx){ return idx;}, 'class': 'BGValue' + ' ' +mapD[i]})
+                .text(function(d,idx){ return parseInt(d);})
+                .style({'fill': '#000000', 'stroke-width': 0, 'stroke': '#000000'});
 
 
-            //if(showValue == 1){
-                svg.select('g.testGraph'+currentWeek).selectAll('.elementGroup').data(testDrive.levels).append('text')
-                    .attr({'x': function(d,idx){ return scaleTimeHeatmap(testDrive.times[idx], testDrive.dates[0]) - 8;}, 'y': svgPadding+ 10 + i*39, 'font-size': 9, 'id': function(d,idx){ return idx;}, 'class': 'BGValue' + ' ' +mapD[i]})
-                    .text(function(d,idx){ return parseInt(d);})
-                    .style({'fill': '#000000', 'stroke-width': 0, 'stroke': '#000000'});
-            //}
+
         }
 
+        $(".slider.normalrange").slider()
+            .on('slideStop', function(e){
+                var lohi = $('.normalController .tooltip-inner').text().replace(/\s/g,'').split(':');
+                low = lohi[0];
+                high = lohi[1];
+                svg.select('g.testGraph'+currentWeek).selectAll('g').selectAll('circle').transition()
+                    .style({'stroke': 'none', 'fill-opacity': 0.65, 'fill': function(d,idx){
+                        var h=0;
+                        var s=0;
+                        var l=0;
 
-        svg.selectAll('.BGValue').on('mouseover', function(d,i){ // svg.selectAll('g rect').on('mouseover', function(d,i){
+                            if(parseInt(d)>high){
+                                var sRangeFunc = d3.scale.linear().domain([parseInt(high)+1, maximumBG]).range([0, 100]);
+                                var lRangeFunc = d3.scale.pow().domain([parseInt(high)+1, maximumBG]).range([63, 55]);
+
+                                if(parseInt(d)>maximumBG){
+                                    s=100;
+                                    l=55;
+                                }else{
+                                    s=sRangeFunc(parseInt(d));
+                                    l=lRangeFunc(parseInt(d));
+                                }
+                            }else if(parseInt(d)<=high && parseInt(d)>low){
+                                s=0;
+                                l=60;
+                            }else if(parseInt(d)<=low){
+                                h=224;
+                                var sRangeFunc = d3.scale.linear().domain([0, low]).range([100,0]);
+                                var lRangeFunc = d3.scale.linear().domain([0, low]).range([36,63]);
+                                s=sRangeFunc(parseInt(d));
+                                l=lRangeFunc(parseInt(d));
+                            }
+                        return 'hsl('+h+','+s+'%,'+l+'%)';
+                    }
+                    });
+            });
+
+
+        svg.selectAll('.elementGroup').on('mouseover', function(d,i){ // svg.selectAll('g rect').on('mouseover', function(d,i){
 //            var textElement = $(this).parent().find('.BGValue[id='+$(this).attr('id')+']');
 //            console.log(d3.select(textElement)[0][0]);
 
-            d3.select(this).transition().attr({'font-size': 20}); // 'y': parseInt(d3.select(textElement)[0][0].attr('y')) - 20,
+            d3.select(this).select('text').transition().attr({'font-size': 20}); // 'y': parseInt(d3.select(textElement)[0][0].attr('y')) - 20,
         });
 
-        svg.selectAll('.BGValue').on('mouseout', function(d,i){
-            var textElement = $(this).parent().find('.BGValue[id='+$(this).attr('id')+']');
-            d3.select(this).transition().attr({ 'font-size': 9}); //'y': parseInt(d3.select(textElement)[0][0].attr('y')) + 20,
+        svg.selectAll('.elementGroup').on('mouseout', function(d,i){
+//            var textElement = $(this).parent().find('.BGValue[id='+$(this).attr('id')+']');
+            d3.select(this).select('text').transition().attr({ 'font-size': 9}); //'y': parseInt(d3.select(textElement)[0][0].attr('y')) + 20,
         });
 
     }
@@ -597,70 +697,93 @@ define(['jquery','D3','queue','moment','slider'], function($, d3, queue, moment)
 
         for(var j=0; j<7; j++){
             var testDrive = eval('structured[currentWeek].'+mapD[j]);
-            svg.select('g.testGraph'+currentWeek).selectAll('g').data(testDrive.levels).enter().append('g')
-                .attr({'class': 'elementGroup'});
-            svg.select('g.testGraph'+currentWeek).selectAll('.elementGroup').data(testDrive.levels).append('circle')
-                .attr({'r': 4, 'cx': function(d,i){ return scaleTime(testDrive.times[i], testDrive.dates[0]);}, 'cy': function(d,i){ return svgHeight*(j) + scaleBG(testDrive.levels[i], raw)}, 'class': 'path' + ' ' + mapD[j]})
-                .style({'stroke': 'none', 'fill': 'rgba(30,30,30,0.5)'});
+            var group = svg.select('g.testGraph'+currentWeek).selectAll('g#day'+j).data(testDrive.levels).enter().append('g')
+                .attr({'class': 'elementGroup','id': 'day'+j});
+            group.append('circle')
+                .attr({'r': 6, 'cx': function(d,i){ return scaleTime(testDrive.times[i], testDrive.dates[0]);}, 'cy': function(d,i){ return svgHeight*(j) + scaleBG(testDrive.levels[i], raw)}, 'class': 'path' + ' ' + mapD[j]})
+                .style({'stroke': 'none', 'fill': function(d,i){
+                    if(parseInt(d)<low){
+                        return "rgba(0,0,255,0.5)";
+                    }else if(parseInt(d)>high){
+                        return "rgba(255,0,0,0.5)";
+                    }else{
+                        return "rgba(30,30,30,0.5)";
+                    }
+                }});
 
-
-            //if(showValue == 1){
-                svg.select('g.testGraph'+currentWeek).selectAll('.elementGroup').data(testDrive.levels).append('text')
+            group.append('text')
                     .attr({'x': function(d,idx){ return scaleTime(testDrive.times[idx], testDrive.dates[0])-(svgWidth-10*svgPadding)/24/2 + 6;}, 'y': function(d,idx){ return svgHeight*(j) + scaleBG(testDrive.levels[idx], raw) + 15 }, 'font-size': 9, 'id': function(d,i){ return i;}, 'class': 'BGValue' + ' ' +mapD[j]})
                     .text(function(d,i){ return parseInt(d);})
                     .style({'fill': '#000000', 'stroke-width': 0, 'stroke': '#000000'});
-            //}
 
         }
-//        if(numOfWeeks == undefined){
-//            numOfWeeks = 1;
-//        }
-//
-//        for(var j=0; j<numOfWeeks; j++){
-//            var testDrive = eval('structured[j].'+day);
-//            var oneDate = new Array(testDrive.dates[0]);
-//
-//            svg.selectAll('rect.weekIndicator'+j).data(oneDate).enter().append('rect')
-//                .attr({'x': svgPadding*3+20, 'y': 8 + j*svgHeight, 'width': 35, 'height': 5, 'class': 'weekIndicator'+j})
-//                .style({'fill': function(d){ if(d != undefined){ return catColors(j)}else{ return '#ffffff';}}});
-//
-//            svg.selectAll('text.monthIndicator'+j).data(oneDate).enter().append('text')
-//                .attr({'x': svgPadding*3+24, 'y': 30 + j*svgHeight, 'width': svgPadding*2, 'height': svgPadding*2, 'font-size': 14, 'class': 'monthIndicator'+j})
-//                .text(function(d,i){ if(d != undefined){ return moment(d).format('MMM');}else{ return null;}})
-//                .style({'fill': '#999999', 'stroke-width': 0});
-//            svg.selectAll('text.dayIndicator'+j).data(oneDate).enter().append('text')
-//                .attr({'x': svgPadding*3+25, 'y': 50 + j*svgHeight, 'width': svgPadding*2, 'height': svgPadding*2, 'font-size': 20, 'class': 'dayIndicator'+j })
-//                .text(function(d,i){ if(d != undefined){ return moment(d).format('DD');}else{ return null;}})
-//                .style({'fill': '#999999', 'stroke-width': 0});
-//
-//            svg.append('g').attr({'class': 'testGraph'+j});
-//            svg.select('g.testGraph'+j).selectAll('g').data(testDrive.levels).enter().append('g')
-//                .attr({'class': 'elementGroup'});
-//            svg.select('g.testGraph'+j).selectAll('g.elementGroup').data(testDrive.levels).append('circle')
-//                .attr({'r': 4, 'cx': function(d,i){ return scaleTime(testDrive.times[i], testDrive.dates[0]);}, 'cy': function(d,i){ return svgHeight*j + scaleBG(testDrive.levels[i], raw)}})
-//                .style({'stroke': 'none', 'fill': 'rgba(30,30,30,0.5)'});
-//
-//            if(showValue == 1){
-//                svg.select('g.testGraph'+j).selectAll('g.elementGroup').data(testDrive.levels).append('text')
-//                    .attr({'x': function(d,i){ return scaleTime(testDrive.times[i], testDrive.dates[0]) - 10;}, 'y': function(d,i){return svgHeight*j + scaleBG(testDrive.levels[i], raw) + 15}, 'font-size': 9, 'id': function(d,i){ return i;}, 'class': 'BGValue'})
-//                    .text(function(d,i){ return d;})
-//                    .style({'fill': '#000000', 'stroke-width': 0, 'stroke': '#000000'});
-//            }
-//        }
 
+        $(".slider.normalrange").slider()
+            .on('slideStop', function(e){
+                var lohi = $('.normalController .tooltip-inner').text().replace(/\s/g,'').split(':');
+                low = lohi[0];
+                high = lohi[1];
 
-        svg.selectAll('.BGValue').on('mouseover', function(d,i){ // svg.selectAll('g rect').on('mouseover', function(d,i){
-//            var textElement = $(this).parent().find('.BGValue[id='+$(this).attr('id')+']');
-//            console.log(d3.select(textElement)[0][0]);
+                svg.selectAll('rect.normalrange').attr({'y': function(d,i){
+                    return scaleBG(high, raw)+i*svgHeight;
+                }, 'height': parseFloat(scaleBG(low, raw) - scaleBG(high,raw))});
 
-            d3.select(this).transition().attr({'font-size': 20}); // 'y': parseInt(d3.select(textElement)[0][0].attr('y')) - 20,
+                svg.select('g.testGraph'+currentWeek).selectAll('g.elementGroup').selectAll('circle')
+                    .style({'fill': function(d,i){
+                        if(parseInt(d)<low){
+                            return "rgba(0,0,255,0.5)";
+                        }else if(parseInt(d)>high){
+                            return "rgba(255,0,0,0.5)";
+                        }else{
+                            return "rgba(30,30,30,0.5)";
+                        }
+                    }});
+            });
+
+        svg.selectAll('.elementGroup').on('mouseover', function(d,i){ // svg.selectAll('g rect').on('mouseover', function(d,i){
+
+            d3.select(this).select('text').transition().attr({'font-size': 20}); // 'y': parseInt(d3.select(textElement)[0][0].attr('y')) - 20,
         });
 
-        svg.selectAll('.BGValue').on('mouseout', function(d,i){
-            var textElement = $(this).parent().find('.BGValue[id='+$(this).attr('id')+']');
-            d3.select(this).transition().attr({ 'font-size': 9}); //'y': parseInt(d3.select(textElement)[0][0].attr('y')) + 20,
+        svg.selectAll('.elementGroup').on('mouseout', function(d,i){
+            d3.select(this).select('text').transition().attr({ 'font-size': 9}); //'y': parseInt(d3.select(textElement)[0][0].attr('y')) + 20,
         });
     }
+
+    $(document).ready(function(){
+        // initiate the date picker
+        if(getQuerystringNameValue('startDate')){
+            $('#datepicker').datepicker('setValue', getQuerystringNameValue('startDate'));
+            dateSel = getQuerystringNameValue('startDate');
+        }else{
+            if(!$('#datepicker').val()){
+                $('#datepicker').datepicker('setValue', '07/01/2013');
+            }
+        }
+
+
+        $('#datepicker').datepicker().on('changeDate', function(ev){
+            dateSel = ev.date.valueOf();
+
+//            queue()
+//                .defer(function(i, callback){
+//                    d3.json("bg/2013-07-01/2013-09-16/", function(d){
+//                        raw = [];
+//                        structured = [];
+//                        d.forEach(function(data){
+//                            raw.push(data);
+//                        });
+//                        callback(null,i);
+//                    })
+//                }, 'bg')
+//                .await(run);
+            loadData(dateSel);
+            $(this).datepicker('hide');
+        });
+//        $('#datepicker').val('2013-07-01');
+
+        loadData(dateSel);
+    });
 
     function run(){
         if(mode == 0){
@@ -674,7 +797,10 @@ define(['jquery','D3','queue','moment','slider'], function($, d3, queue, moment)
             var draw = drawShape;
         }
 
-        $('input:radio[name="viewmode"][value="'+mode+'"]').prop('checked', true);
+
+
+        // configure the radio box
+        $('button[name="viewmode"][data-value="'+mode+'"]').addClass('active');
 
         $('.slider.weeks').slider({'tooltip': 'show'})
             .on('slideStop', function(e){
@@ -692,12 +818,11 @@ define(['jquery','D3','queue','moment','slider'], function($, d3, queue, moment)
                 }
 //                console.log($(this).val());
             });
-		
-		$(".slider.normalrange").slider({});
+
 
         // toggle viewmode
         $('.viewmode').click(function() {
-            window.location.href = "/diabetes-viz/public/?mode=" + $(this).val();
+            window.location.href = "/diabetes-viz/public/?mode=" + $(this).val() + '&startDate=' + $('#datepicker').val();
         });
 
         // toggle buttons
@@ -765,7 +890,7 @@ define(['jquery','D3','queue','moment','slider'], function($, d3, queue, moment)
                 	if (mode == 0) {
  	               		d3.selectAll('.path.monday, .path.tuesday, .path.wednesday, .path.thursday, .path.friday').style("fill", "rgba(30,30,30,0.2)");
                 	} else if (mode == 1) {
-                		d3.selectAll('.path.monday, .path.tuesday, .path.wednesday, .path.thursday, .path.friday').style("fill-opacity", "0.3");
+                		d3.selectAll('.path.monday, .path.tuesday, .path.wednesday, .path.thursday, .path.friday').style("fill-opacity", "0.01");
                     } else {
  	               		d3.selectAll('.path.monday, .path.tuesday, .path.wednesday, .path.thursday, .path.friday').style("stroke", "rgba(110,110,110,0.4)");
                     }
@@ -777,7 +902,7 @@ define(['jquery','D3','queue','moment','slider'], function($, d3, queue, moment)
                 	if (mode == 0) {
 	                	d3.selectAll('.path.prevsat, .path.saturday, .path.sunday').style("fill", "rgba(30,30,30,0.2)");
                 	} else if (mode == 1) {
-                		d3.selectAll('.path.prevsat, .path.saturday, .path.sunday').style("fill-opacity", "0.3");
+                		d3.selectAll('.path.prevsat, .path.saturday, .path.sunday').style("fill-opacity", "0.01");
                 	} else {
                 		d3.selectAll('.path.prevsat, .path.saturday, .path.sunday').style("stroke", "rgba(110,110,110,0.4)");
                 	}

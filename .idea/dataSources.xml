@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="DataSourceManagerImpl" format="xml" hash="2760162504">
+    <data-source source="LOCAL" name="Data Source" uuid="b058e54a-ef71-4df3-a094-5f1d21a8afae">
+      <driver-ref>sqlite.xerial</driver-ref>
+      <synchronize>true</synchronize>
+      <jdbc-driver>org.sqlite.JDBC</jdbc-driver>
+      <jdbc-url>jdbc:sqlite:$PROJECT_DIR$/app/database/production.sqlite</jdbc-url>
+      <libraries>
+        <library>
+          <url>jar://$PROJECT_DIR$/sqlitejdbc-v056.jar!/</url>
+        </library>
+        <library>
+          <url>file://$PROJECT_DIR$/zentus-sqlite-license.txt</url>
+        </library>
+      </libraries>
+    </data-source>
+  </component>
+</project>
+
