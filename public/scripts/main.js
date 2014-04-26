@@ -477,29 +477,35 @@ define(['jquery','D3','queue','moment','slider','datepicker'], function($, d3, q
                 .attr({'class': 'elementGroup','id': 'day'+i});
             group.append('circle')
                 .attr({'cx': function(d,idx){ return scaleTimeHeatmap(testDrive.times[idx], testDrive.dates[0]);}, 'cy': svgPadding-10 + 14.5 + i*39, 'r': 14.5, 'id': function(d,idx){ return idx;}, 'class': 'path' + ' ' + mapD[i] })
-                .style({'stroke': 'none', 'fill-opacity': 0.65, 'fill': function(d,idx){
+                .style({'stroke': function(d, idx){
+                    if(parseInt(d)<=high && parseInt(d)>low){
+                        return '#999999';
+                    }else{
+                        return 'none';
+                    }
+                }})
+                .style({'fill-opacity': 0.65, 'fill': function(d,idx){
                     var h=0;
                     var s=0;
                     var l=0;
 
-                    if(d>high){
-                        var sRangeFunc = d3.scale.linear().domain([parseInt(high)+1, maximumBG]).range([0, 100]);
-                        var lRangeFunc = d3.scale.pow().domain([parseInt(high)+1, maximumBG]).range([63, 55]);
+                    if(parseInt(d)>high){
+                        var sRangeFunc = d3.scale.linear().domain([parseInt(high)+1, maximumBG]).range([30, 100]);
+                        var lRangeFunc = d3.scale.pow().domain([parseInt(high)+1, maximumBG]).range([80, 54]);
 
-                        if(d>maximumBG){
+                        if(parseInt(d)>maximumBG){
                             s=100;
-                            l=55;
+                            l=54;
                         }else{
-                            s=sRangeFunc(d);
-                            l=lRangeFunc(d);
+                            s=sRangeFunc(parseInt(d));
+                            l=lRangeFunc(parseInt(d));
                         }
-                    }else if(d<=high && d>low){
-                        s=0;
-                        l=60;
+                    }else if(parseInt(d)<=high && parseInt(d)>low){
+                        return 'none';
                     }else{
                         h=224;
-                        var sRangeFunc = d3.scale.linear().domain([0, low]).range([100,0]);
-                        var lRangeFunc = d3.scale.linear().domain([0, low]).range([36,63])
+                        var sRangeFunc = d3.scale.linear().domain([0, low]).range([100,30]);
+                        var lRangeFunc = d3.scale.linear().domain([0, low]).range([38,80])
                         s=sRangeFunc(d);
                         l=lRangeFunc(d);
                     }
@@ -521,29 +527,35 @@ define(['jquery','D3','queue','moment','slider','datepicker'], function($, d3, q
                 low = lohi[0];
                 high = lohi[1];
                 svg.select('g.testGraph'+currentWeek).selectAll('g').selectAll('circle').transition()
-                    .style({'stroke': 'none', 'fill-opacity': 0.65, 'fill': function(d,idx){
+                    .style({'stroke': function(d, idx){
+                        if(parseInt(d)<=high && parseInt(d)>low){
+                            return '#999999';
+                        }else{
+                            return 'none';
+                        }
+                    }})
+                    .style({'fill-opacity': 0.65, 'fill': function(d,idx){
                         var h=0;
                         var s=0;
                         var l=0;
 
                             if(parseInt(d)>high){
-                                var sRangeFunc = d3.scale.linear().domain([parseInt(high)+1, maximumBG]).range([0, 100]);
-                                var lRangeFunc = d3.scale.pow().domain([parseInt(high)+1, maximumBG]).range([63, 55]);
+                                var sRangeFunc = d3.scale.linear().domain([parseInt(high)+1, maximumBG]).range([30, 100]);
+                                var lRangeFunc = d3.scale.pow().domain([parseInt(high)+1, maximumBG]).range([80, 54]);
 
                                 if(parseInt(d)>maximumBG){
                                     s=100;
-                                    l=55;
+                                    l=54;
                                 }else{
                                     s=sRangeFunc(parseInt(d));
                                     l=lRangeFunc(parseInt(d));
                                 }
                             }else if(parseInt(d)<=high && parseInt(d)>low){
-                                s=0;
-                                l=60;
+                                return 'none';
                             }else if(parseInt(d)<=low){
                                 h=224;
-                                var sRangeFunc = d3.scale.linear().domain([0, low]).range([100,0]);
-                                var lRangeFunc = d3.scale.linear().domain([0, low]).range([36,63]);
+                                var sRangeFunc = d3.scale.linear().domain([0, low]).range([100,30]);
+                                var lRangeFunc = d3.scale.linear().domain([0, low]).range([38,80]);
                                 s=sRangeFunc(parseInt(d));
                                 l=lRangeFunc(parseInt(d));
                             }
@@ -951,4 +963,9 @@ define(['jquery','D3','queue','moment','slider','datepicker'], function($, d3, q
         }
     }
 
+    $('#eraseData').click(function(e){
+        if(confirm("Are your sure you want to delete the data from the database? Data cannot be restored once deleted!")){
+            location.href='deleteAll';
+        }
+    });
 });

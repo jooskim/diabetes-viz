@@ -82,3 +82,8 @@ Route::post('/dataUpload', function(){
         }
     }
 });
+
+Route::get('/deleteAll', function(){
+    DB::table('BG')->delete();
+    return Redirect::to('/');
+});

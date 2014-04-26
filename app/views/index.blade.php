@@ -117,6 +117,26 @@ Type 1 Diabetes Visualization Prototype 1
     <div class="row-fluid">
         <div style="padding-top: 15px; padding-bottom: 5px; color: #666; font-size: 10px;">Code by Joosung Kim (jooskim <i>at</i> umich.edu)</div>
     </div>
+    <div class="row-fluid">
+        <button class="btn btn-danger" id="eraseData">ERASE DATA</button>
+        <div class="modal fade" id="deletionModal" tabIndex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                        <h4 class="modal-title" id="myModalLabel">Erase Data</h4>
+                    </div>
+                    <div class="modal-body">
+                        Are you sure you want to delete the data from the database? Data can't be recovered once deleted.
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                        <button type="button" class="btn btn-warning">Delete</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
 
